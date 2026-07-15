@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Meta Tags -->
+  <title>TaskFlow – Smart To-Do List App</title>
+  <meta name="description" content="An intelligent task management application that helps you organize, prioritize, and track your daily activities efficiently with local persistence and automatic routine resets.">
+  <meta name="keywords" content="task manager, to-do list, productivity, local storage, task reset, smart reminders, dashboard analytics">
+  
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+
+  <main class="app-container" id="app-workspace">
+    
+    <!-- ==========================================================================
+         COLUMN 1: SIDEBAR NAVIGATION (LEFT)
+         ========================================================================== -->
+    <aside class="workspace-sidebar" aria-label="Task Navigation">
+      <div class="brand">
+        <div class="brand-icon">TF</div>
+        <h1 id="main-heading">TaskFlow <span>Smart</span></h1>
+      </div>
+      
+      <nav style="margin-top: 1.5rem;">
+        <ul class="sidebar-menu">
+          <li>
+            <a href="#" class="menu-item active" data-filter="all" id="filter-all">
+              <span class="menu-item-left">
+                <span class="material-icons">assignment</span> All Tasks
+              </span>
+              <span class="badge badge-all" id="badge-all">0</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="menu-item" data-filter="pending" id="filter-pending">
+              <span class="menu-item-left">
+                <span class="material-icons">pending_actions</span> Active
+              </span>
+              <span class="badge badge-pending" id="badge-pending">0</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="menu-item" data-filter="completed" id="filter-completed">
+              <span class="menu-item-left">
+                <span class="material-icons">task_alt</span> Completed
+              </span>
+              <span class="badge badge-completed" id="badge-completed">0</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="menu-item" data-filter="recurring" id="filter-recurring">
+              <span class="menu-item-left">
+                <span class="material-icons">autorenew</span> Recurring
+              </span>
+              <span class="badge badge-recurring" id="badge-recurring">0</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-secondary btn-icon" id="theme-toggle-btn" title="Toggle Theme" aria-label="Toggle Theme" style="width:100%; border-radius: var(--radius-md); justify-content: flex-start; padding: 0.75rem 1rem; gap: 0.75rem;">
+          <span class="material-icons">dark_mode</span>
+          <span class="theme-text">Dark Mode</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ==========================================================================
+         COLUMN 2: MAIN TASKS LIST (CENTER)
+         ========================================================================== -->
+    <section class="workspace" id="app-content-area">
+      
+      <!-- Top Workspace Bar -->
+      <header class="workspace-header">
+        <div class="header-title-group">
+          <h2>My Workspace</h2>
+          <p class="current-date-display" id="header-date">Today</p>
+        </div>
+        
+        <div class="workspace-actions">
+          <button class="btn btn-primary btn-add-task" id="btn-add-task-main" aria-label="Add Task">
+            <span class="material-icons">add</span>
+            Add Task
+          </button>
+        </div>
+      </header>
+
+      <div class="workspace-body-content">
+        <!-- Search & Filter Controls -->
+        <div class="filter-bar">
+          <div class="search-input-wrapper">
+            <span class="material-icons search-icon">search</span>
+            <input type="text" class="search-input" id="search-input" placeholder="Search tasks by title or description..." aria-label="Search tasks">
+          </div>
+          
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <span class="material-icons" style="font-size:1.1rem; color:var(--text-secondary)">sort</span>
+            <select class="sort-select" id="sort-select" aria-label="Sort tasks">
+              <option value="due_date">Due Date</option>
+              <option value="priority">Priority (High first)</option>
+              <option value="title">Alphabetical</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tasks Display Container -->
+        <div class="task-list-container">
+          
+          <!-- Empty State -->
+          <div class="empty-state" id="empty-state" style="display: none;">
+            <span class="material-icons empty-state-icon">assignment_late</span>
+            <h3>All clean!</h3>
+            <p>You have no tasks in this view. Click "Add Task" to create a new activity.</p>
+            <button class="btn btn-primary btn-add-task">Add New Task</button>
+          </div>
+
+          <!-- Pending Section -->
+          <div class="task-group pending-section" id="pending-group">
+            <h2 class="task-group-title">Active Tasks</h2>
+            <div class="pending-tasks-list" id="pending-list">
+              <!-- Task Cards injected dynamically -->
+            </div>
+          </div>
+
+          <!-- Completed Section -->
+          <div class="task-group completed-section" id="completed-group">
+            <h2 class="task-group-title">Completed Tasks</h2>
+            <div class="completed-tasks-list" id="completed-list">
+              <!-- Completed Task Cards injected dynamically -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+    </section>
+
+    <!-- ==========================================================================
+         COLUMN 3: PRODUCTIVITY STATS & CALENDAR (RIGHT)
+         ========================================================================== -->
+    <aside class="productivity-panel" id="productivity-sidebar" aria-label="Productivity Analytics">
+      
+      <header class="panel-header">
+        <h3>Productivity Hub</h3>
+      </header>
+
+      <div class="panel-body">
+        
+        <!-- Widget 1: Completion Stats -->
+        <section class="stat-card" aria-label="Completion Progress">
+          <div class="stat-card-title">Task Completion</div>
+          
+          <div class="progress-circle-container">
+            <svg class="progress-circle-svg" viewBox="0 0 100 100">
+              <circle class="circle-bg" cx="50" cy="50" r="40" />
+              <circle class="circle-fill" cx="50" cy="50" r="40" id="stats-progress-ring" />
+            </svg>
+            <div class="progress-percentage-text" id="stats-completion-pct">0%</div>
+          </div>
+          
+          <div class="stat-details-grid">
+            <div class="stat-detail-item">
+              <span class="stat-detail-num" id="stats-total-num">0</span>
+              <span class="stat-detail-label">Total Tasks</span>
+            </div>
+            <div class="stat-detail-item" style="border-left: 1px solid var(--border-color);">
+              <span class="stat-detail-num" id="stats-completed-num" style="color: var(--success);">0</span>
+              <span class="stat-detail-label">Completed</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Widget 2: Priority Breakdown -->
+        <section class="stat-card" aria-label="Priority Breakdown">
+          <div class="stat-card-title">Priority Distribution</div>
+          
+          <div class="priority-stats-container">
+            <!-- High Priority -->
+            <div class="priority-stat-row">
+              <div class="priority-stat-label">
+                <span class="priority-bullet high"></span> High
+              </div>
+              <div class="priority-bar-wrapper">
+                <div class="priority-bar-fill high" id="bar-high" style="width: 0%;"></div>
+              </div>
+              <div class="priority-stat-count" id="count-high">0</div>
+            </div>
+            
+            <!-- Medium Priority -->
+            <div class="priority-stat-row">
+              <div class="priority-stat-label">
+                <span class="priority-bullet medium"></span> Medium
+              </div>
+              <div class="priority-bar-wrapper">
+                <div class="priority-bar-fill medium" id="bar-medium" style="width: 0%;"></div>
+              </div>
+              <div class="priority-stat-count" id="count-medium">0</div>
+            </div>
+
+            <!-- Low Priority -->
+            <div class="priority-stat-row">
+              <div class="priority-stat-label">
+                <span class="priority-bullet low"></span> Low
+              </div>
+              <div class="priority-bar-wrapper">
+                <div class="priority-bar-fill low" id="bar-low" style="width: 0%;"></div>
+              </div>
+              <div class="priority-stat-count" id="count-low">0</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Widget 3: Calendar Calendar View -->
+        <section class="stat-card" aria-label="Monthly Due Date Calendar">
+          <div class="stat-card-title" id="calendar-title">Calendar</div>
+          <div class="calendar-wrapper">
+            <div class="calendar-weekdays">
+              <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+            </div>
+            <div class="calendar-days" id="calendar-days-grid">
+              <!-- Days loaded dynamically in JS -->
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Add/Edit Task Modal Dialog (Shared overlay) -->
+  <div class="modal-overlay" id="task-modal">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h3>Create New Task</h3>
+        <button class="btn btn-icon btn-close-modal" aria-label="Close modal">&times;</button>
+      </header>
+      
+      <form class="task-form" id="task-form">
+        <div class="form-group">
+          <label for="task-title">Task Title *</label>
+          <input type="text" id="task-title" class="form-input input-task-title" placeholder="e.g. Work Out" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="task-desc">Description</label>
+          <textarea id="task-desc" class="form-input input-task-desc" rows="3" placeholder="Add additional details..."></textarea>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-due">Due Date & Time</label>
+            <input type="datetime-local" id="task-due" class="form-input input-task-due">
+          </div>
+          
+          <div class="form-group">
+            <label for="task-priority">Priority</label>
+            <select id="task-priority" class="form-input input-task-priority">
+              <option value="low">Low (Can be done later)</option>
+              <option value="medium" selected>Medium (Important work)</option>
+              <option value="high">High (Urgent work)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="task-recurrence">Automatic Reset (Recurrence)</label>
+            <select id="task-recurrence" class="form-input input-task-recurrence">
+              <option value="none" selected>One-time Task</option>
+              <option value="daily">Daily Reset</option>
+              <option value="weekly">Weekly Reset</option>
+              <option value="monthly">Monthly Reset</option>
+              <option value="yearly">Yearly Reset</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="task-reminder">Reminder Alarm</label>
+            <select id="task-reminder" class="form-input input-task-reminder">
+              <option value="none">No reminder</option>
+              <option value="at_due" selected>At Due Time</option>
+              <option value="10m_before">10 minutes before</option>
+              <option value="30m_before">30 minutes before</option>
+              <option value="1h_before">1 hour before</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Subtasks Checklist Section -->
+        <div class="form-group">
+          <label>Subtasks Checklist</label>
+          <div class="subtask-add-row">
+            <input type="text" class="form-input input-subtask-new" id="subtask-input" placeholder="Add subtask item..." style="flex:1;">
+            <button type="button" class="btn btn-secondary btn-add-subtask" id="btn-add-subtask">Add</button>
+          </div>
+          <div class="subtasks-staging" id="subtasks-staging">
+            <!-- Staged subtasks listed here -->
+          </div>
+        </div>
+
+        <footer class="modal-actions">
+          <button type="button" class="btn btn-secondary btn-cancel-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Task</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

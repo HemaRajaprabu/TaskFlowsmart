@@ -1,0 +1,17 @@
+{
+  "name": "taskflow-smart-todo",
+  "version": "1.0.0",
+  "description": "TaskFlow - Smart To-Do List Application with Cloud Sync and Recurrence Simulator",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "todo",
+    "cloud-sync",
+    "offline-first",
+    "simulator"
+  ],
+  "author": "Antigravity AI",
+  "license": "ISC"
+}
